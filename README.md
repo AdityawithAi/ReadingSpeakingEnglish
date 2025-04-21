@@ -23,8 +23,8 @@ A comprehensive web application for assessing English reading and grammar skills
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/enhanced-reading-assessment.git
-   cd enhanced-reading-assessment
+   git clone https://github.com/AdityawithAi/ReadingSpeakingEnglish.git
+   cd ReadingSpeakingEnglish
    ```
 
 2. Create and activate a virtual environment:
@@ -77,4 +77,4 @@ A comprehensive web application for assessing English reading and grammar skills
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome! Please feel free to submit a Pull Request.
