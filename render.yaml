@@ -2,8 +2,19 @@ services:
   - type: web
     name: enhance-english-learning
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app
+    buildCommand: |
+      # Make build script executable
+      chmod +x build.sh
+      # Run build script to compile whisper.cpp and download model
+      ./build.sh
+      # Install Python requirements
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11 
+        value: 3.9.0
+      - key: WHISPER_CPP_CLI_PATH
+        value: ./whisper.cpp/build/bin/main
+      - key: WHISPER_CPP_MODEL_PATH
+        value: ./whisper.cpp/models/ggml-base.en.bin 
