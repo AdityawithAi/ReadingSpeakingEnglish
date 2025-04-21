@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Reading Assessment Tool</title>
+    <!-- Modern Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap and other CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-reader me-2"></i>
+                Enhanced Reading Assessment Tool
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/realtime-reading">
+                            <i class="fas fa-microphone-alt me-1"></i> Real-time Reading
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/diagnostics">
+                            <i class="fas fa-tools me-1"></i> Diagnostics
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Left Sidebar - Navigation -->
+            <div class="col-md-3">
+                <div class="list-group mb-4">
+                    <button id="nav-text-input" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-file-alt me-2"></i> Text Input
+                    </button>
+                    <button id="nav-grammar-test" class="list-group-item list-group-item-action">
+                        <i class="fas fa-spell-check me-2"></i> Grammar Test
+                    </button>
+                    <button id="nav-reading-assessment" class="list-group-item list-group-item-action">
+                        <i class="fas fa-microphone-alt me-2"></i> Reading Assessment
+                    </button>
+                    <button id="nav-results" class="list-group-item list-group-item-action" disabled aria-disabled="true">
+                        <i class="fas fa-chart-pie me-2"></i> Analysis Results
+                    </button>
+                </div>
+
+                <!-- Student Information Panel -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-user-graduate me-2"></i> Student Information
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="student-name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="student-name" placeholder="Enter student name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="grade-level" class="form-label">Grade Level</label>
+                            <select class="form-select" id="grade-level">
+                                <option value="1">Grade 1</option>
+                                <option value="2">Grade 2</option>
+                                <option value="3">Grade 3</option>
+                                <option value="4">Grade 4</option>
+                                <option value="5" selected>Grade 5</option>
+                                <option value="6">Grade 6</option>
+                                <option value="7">Grade 7</option>
+                                <option value="8">Grade 8</option>
+                                <option value="9">Grade 9</option>
+                                <option value="10">Grade 10</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-md-9">
+                <!-- Alerts for notifications -->
+                <div id="alerts-container"></div>
+                
+                <!-- Text Input Section -->
+                <div id="section-text-input" class="content-section active">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-file-alt me-2"></i> Text Input
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="textInputTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-panel" type="button" role="tab">Upload File</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-panel" type="button" role="tab">Direct Text Input</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content mt-3" id="textInputTabContent">
+                                <!-- Upload File Panel -->
+                                <div class="tab-pane fade show active" id="upload-panel" role="tabpanel">
+                                    <form id="upload-form">
+                                        <div class="mb-3">
+                                            <label for="file-upload" class="form-label">Upload PDF or Text File</label>
+                                            <input class="form-control" type="file" id="file-upload" accept=".pdf,.txt">
+                                            <div class="form-text">Maximum file size: 16MB</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-upload me-2"></i> Upload and Extract Text
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Direct Text Input Panel -->
+                                <div class="tab-pane fade" id="text-panel" role="tabpanel">
+                                    <form id="text-form">
+                                        <div class="mb-3">
+                                            <label for="passage-title" class="form-label">Reading Passage Title</label>
+                                            <input type="text" class="form-control" id="passage-title" placeholder="Enter a title for this passage">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="passage-text" class="form-label">Reading Passage Text</label>
+                                            <textarea class="form-control" id="passage-text" rows="10" placeholder="Enter text for reading assessment..."></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i> Save Text
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Preview Card - shown after text is entered/uploaded -->
+                    <div id="text-preview-card" class="card mt-4 d-none">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-check-circle me-2"></i> Text Ready for Assessment
+                        </div>
+                        <div class="card-body">
+                            <h5 id="preview-title" class="card-title"></h5>
+                            <div id="preview-text" class="card-text border p-3 rounded bg-light"></div>
+                            <div class="mt-3">
+                                <button id="continue-btn" class="btn btn-success">
+                                    <i class="fas fa-arrow-right me-2"></i> Continue to Grammar Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grammar Test Section -->
+                <div id="section-grammar-test" class="content-section">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-spell-check me-2"></i> Grammar Test
+                        </div>
+                        <div class="card-body">
+                            <div id="grammar-loading" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading grammar test...</span>
+                                </div>
+                                <p class="mt-2">Loading grammar test...</p>
+                            </div>
+
+                            <div id="grammar-test-container" class="d-none">
+                                <h5 class="mb-4">Grammar Assessment</h5>
+                                <div id="grammar-questions"></div>
+                                <button id="submit-grammar" class="btn btn-primary mt-3">
+                                    <i class="fas fa-check-circle me-2"></i> Submit Answers
+                                </button>
+                            </div>
+
+                            <div id="grammar-results" class="d-none">
+                                <h5 class="mb-3">Grammar Test Results</h5>
+                                <div class="row text-center mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h2 id="grammar-score" class="display-4 text-primary">0%</h2>
+                                                <p class="mb-0">Score</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h2 id="grammar-correct" class="display-4 text-success">0/0</h2>
+                                                <p class="mb-0">Correct Answers</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h2 id="grammar-level" class="display-6 text-info">N/A</h2>
+                                                <p class="mb-0">Proficiency Level</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Concepts Mastered</h6>
+                                        <ul id="concepts-mastered" class="list-group mb-3"></ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Areas to Improve</h6>
+                                        <ul id="concepts-improve" class="list-group mb-3"></ul>
+                                    </div>
+                                </div>
+
+                                <h6>Recommendations</h6>
+                                <ul id="grammar-recommendations" class="list-group mb-3"></ul>
+
+                                <div class="mt-4">
+                                    <button id="continue-to-reading" class="btn btn-success">
+                                        <i class="fas fa-arrow-right me-2"></i> Continue to Reading Assessment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reading Assessment Section -->
+                <div id="section-reading-assessment" class="content-section">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-microphone-alt me-2"></i> Reading Assessment
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5 id="reading-passage-title" class="card-title mb-3"></h5>
+                                <div id="reading-passage-text" class="border p-3 rounded bg-light" data-highlight-enabled="true"></div>
+                                
+                                <!-- Error highlighting legend -->
+                                <div class="error-highlight-legend mt-2 d-none bg-light p-2 border rounded">
+                                    <small class="d-block mb-1"><strong>Error Highlighting Guide:</strong></small>
+                                    <div class="d-flex flex-wrap">
+                                        <div class="me-3 mb-1">
+                                            <span class="error-highlight mispronounced">Mispronounced</span>
+                                        </div>
+                                        <div class="me-3 mb-1">
+                                            <span class="error-highlight skipped">Skipped</span>
+                                        </div>
+                                        <div class="me-3 mb-1">
+                                            <span class="error-highlight substituted">Substituted</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <i class="fas fa-microphone me-2"></i> Record Reading
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="recording-controls">
+                                        <button id="start-recording" class="btn btn-danger btn-lg">
+                                            <i class="fas fa-microphone me-2"></i> Start Recording
+                                        </button>
+                                        <button id="stop-recording" class="btn btn-secondary btn-lg d-none">
+                                            <i class="fas fa-stop-circle me-2"></i> Stop Recording
+                                        </button>
+                                    </div>
+                                    <div id="recording-status" class="mt-3 d-none">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <div class="recording-indicator me-2"></div>
+                                            <span id="recording-time">00:00</span>
+                                        </div>
+                                    </div>
+                                    <div id="transcription-loading" class="mt-3 d-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Processing audio...</span>
+                                        </div>
+                                        <p>Processing audio...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="transcription-result" class="card mb-4 d-none">
+                                <div class="card-header bg-success text-white">
+                                    <i class="fas fa-file-alt me-2"></i> Transcription Result
+                                </div>
+                                <div class="card-body">
+                                    <h6>Transcribed Text:</h6>
+                                    <div id="transcribed-text" class="border p-3 rounded bg-light mb-3"></div>
+                                    
+                                    <button id="analyze-reading" class="btn btn-primary">
+                                        <i class="fas fa-chart-bar me-2"></i> Analyze Reading
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="section-results" class="content-section">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-chart-pie me-2"></i> Comprehensive Analysis Results
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-panel" type="button" role="tab">Overview</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="reading-tab" data-bs-toggle="tab" data-bs-target="#reading-panel" type="button" role="tab">Reading Analysis</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="grammar-tab" data-bs-toggle="tab" data-bs-target="#grammar-panel" type="button" role="tab">Grammar Skills</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="recommendations-tab" data-bs-toggle="tab" data-bs-target="#recommendations-panel" type="button" role="tab">Recommendations</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content mt-3" id="resultTabContent">
+                                <!-- Overview Panel -->
+                                <div class="tab-pane fade show active" id="overview-panel" role="tabpanel">
+                                    <div class="row text-center mb-4">
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="overall-score" class="display-4 text-primary">0</h2>
+                                                    <p class="mb-0">Overall Literacy Score</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="reading-level" class="display-6 text-info">N/A</h2>
+                                                    <p class="mb-0">Reading Level</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="grade-equivalent" class="display-4 text-success">0</h2>
+                                                    <p class="mb-0">Grade Equivalent</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h5>Strengths</h5>
+                                    <ul id="strengths-list" class="list-group mb-4"></ul>
+
+                                    <h5>Areas to Improve</h5>
+                                    <ul id="areas-list" class="list-group mb-4"></ul>
+
+                                    <h5>Next Steps</h5>
+                                    <ul id="next-steps-list" class="list-group"></ul>
+                                </div>
+                                
+                                <!-- Reading Analysis Panel -->
+                                <div class="tab-pane fade" id="reading-panel" role="tabpanel">
+                                    <div class="row text-center mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="accuracy-score" class="display-4 text-primary">0%</h2>
+                                                    <p class="mb-0">Accuracy</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="fluency-score" class="display-4 text-success">0</h2>
+                                                    <p class="mb-0">Fluency</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="wpm-score" class="display-4 text-info">0</h2>
+                                                    <p class="mb-0">Words/Minute</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="comprehension-score" class="display-4 text-warning">0%</h2>
+                                                    <p class="mb-0">Comprehension</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h5>Reading Analysis</h5>
+                                    <div id="highlighted-text" class="border p-3 rounded bg-light mb-4"></div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header bg-light">
+                                                    Word Statistics
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="word-stats-chart" width="400" height="300" role="img" aria-label="Word statistics chart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header bg-light">
+                                                    Fluency Metrics
+                                                </div>
+                                                <div class="card-body">
+                                                    <table class="table table-bordered">
+                                                        <tr>
+                                                            <th>Words Per Minute</th>
+                                                            <td id="wpm-value">0</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Target WPM (Grade Level)</th>
+                                                            <td id="target-wpm">0</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Fluency Level</th>
+                                                            <td id="fluency-level">N/A</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Prosody Score</th>
+                                                            <td id="prosody-score">0</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Grammar Skills Panel -->
+                                <div class="tab-pane fade" id="grammar-panel" role="tabpanel">
+                                    <div class="row text-center mb-4">
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="grammar-result-score" class="display-4 text-primary">0%</h2>
+                                                    <p class="mb-0">Grammar Score</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="grammar-result-level" class="display-6 text-info">N/A</h2>
+                                                    <p class="mb-0">Proficiency Level</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light mb-3">
+                                                <div class="card-body">
+                                                    <h2 id="grammar-result-correct" class="display-4 text-success">0/0</h2>
+                                                    <p class="mb-0">Correct Answers</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <h5>Concepts Mastered</h5>
+                                            <ul id="concepts-mastered-result" class="list-group mb-3"></ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Areas to Improve</h5>
+                                            <ul id="concepts-improve-result" class="list-group mb-3"></ul>
+                                        </div>
+                                    </div>
+
+                                    <h5>Grammar Recommendations</h5>
+                                    <ul id="grammar-recommendations-result" class="list-group"></ul>
+                                </div>
+                                
+                                <!-- Recommendations Panel -->
+                                <div class="tab-pane fade" id="recommendations-panel" role="tabpanel">
+                                    <h5>Suggested Reading Topics</h5>
+                                    <div class="row mb-4" id="reading-topics-container"></div>
+                                    
+                                    <h5>Personalized Next Steps</h5>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <ol id="next-steps-detailed" class="mb-0"></ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-center">
+                                <button id="restart-assessment" class="btn btn-primary">
+                                    <i class="fas fa-redo me-2"></i> New Assessment
+                                </button>
+                                <button id="print-results" class="btn btn-success ms-2">
+                                    <i class="fas fa-print me-2"></i> Print Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Enhanced Reading Assessment Tool &copy; 2025</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
